@@ -1,6 +1,6 @@
 # skull
 
-A Clojure library designed to ... well, that part is up to you.
+Clojure [EDN](https://github.com/edn-format/edn) database
 
 ## Usage
 
