@@ -1,6 +1,6 @@
 # skull
 
-Clojure [EDN](https://github.com/edn-format/edn) database
+Clojure [EDN](https://github.com/edn-format/edn) memory database
 
 ## Usage
 
