@@ -1,10 +1,11 @@
 (ns skull.core-test
   (:require [clojure.test :refer :all]
             [skull.core :refer :all]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [skull.util :as util]))
 
 (defn delete [file]
-  (when (exists file)
+  (when (util/exists file)
     (io/delete-file file)))
 
 (defn in-path [file]
@@ -17,7 +18,7 @@
       (let [file (in-path "serialize.sk")]
         (delete file)
         (snapshot file data)
-        (is (= true (exists file)))
+        (is (= true (util/exists file)))
         (is (= data (rest (recover file))))))
     
     (testing "convert to byte buffer"
@@ -33,7 +34,7 @@
       (let [file (in-path "journaled.sk")]
         (delete (journal-ext file))
         (journal file data)
-        (is (= true (exists (journal-ext file))))))))
+        (is (= true (util/exists (journal-ext file))))))))
 
 (deftest access
   
@@ -41,7 +42,7 @@
     (let [src (atom 0)]
       (dotimes [_ 9]
         (future (transaction src (fn [data] (+ data 1)))))
-      (Thread/sleep 100) ;; workaround, who to join all futures?
+      (Thread/sleep 100) ;; workaround, how to join all futures?
       (is (= 9 @src)))))
 
 (deftest unit-of-work
@@ -56,7 +57,7 @@
 (deftest version
   
   (testing "it returs a hash number"
-     (is (= 110297644 (adler "skull" ))))
+     (is (= 110297644 (util/adler "skull" ))))
   
   (testing "it versionate a data"
-    (is (= {:version 8061010} (first (versionate (list)))))))
+    (is (= {:version 8061010} (first (util/versionate (list)))))))

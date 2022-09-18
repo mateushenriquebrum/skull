@@ -1,26 +1,12 @@
 (ns skull.core
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [skull.util :as util])
   (:import
    [java.nio ByteBuffer]
    [java.nio.charset StandardCharsets]
    [java.nio.file OpenOption Paths StandardOpenOption]
    [java.net URI]
-   [java.util.zip Adler32]
    [java.nio.channels FileChannel]))
-
-(defn adler [string]
-  (let [bts (.getBytes string)
-        alg (Adler32.)
-        size (count bts)]
-    (.update alg bts 0 size)
-    (.getValue alg)))
-
-(defn versionate [data]
-  (let [meta {:version (adler (pr-str data))}]
-    (conj data meta)))
-
-(defn exists [file]
-  (.exists (io/file file)))
 
 (defn string-to-byte-buffer [string]
   (let [bts (.getBytes string StandardCharsets/UTF_8)]
@@ -41,15 +27,15 @@
       (.write c bytes))))
 
 (defn snapshot [file, structure]
-  (let [data (pr-str (versionate structure))]
+  (let [data (pr-str (util/versionate structure))]
   (with-open [w (io/writer file :append false)]
     (.write w data))))
 
 (defn recover [file]
-  (if (exists file)
+  (if (util/exists file)
     (let [data (slurp file)]
       (read-string data))
-    (let [h (adler (pr-str (list)))]
+    (let [h (util/adler (pr-str (list)))]
       (snapshot file (list {:version h})))))
 
 (defn transaction [src fn]
