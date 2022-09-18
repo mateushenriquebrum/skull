@@ -14,13 +14,14 @@
   (str (util/pwd) "/test/res/" file))
 
 (deftest persist-file
+  
   (let [data '({:name "Mateus" :surname "Brum"} {:name "Iago" :surname "Brum"})]
     
     (testing "it serialize data into the file"
-      (let [file (res-path "serialize.sk")]
+      (let [file (res-path "serialize")]
         (delete file)
         (snapshot file data)
-        (is (= true (util/exists file)))
+        (is (= true (util/exists (skull-ext file))))
         (is (= data (rest (recover file))))))
     
     (testing "convert to byte buffer"
@@ -28,12 +29,12 @@
         (is 16 (.capacity (util/string-to-byte-buffer to-convert)))))
     
     (testing "it recover empty list"
-      (let [file (res-path "empty.sk")]
-        (delete file)
+      (let [file (res-path "empty")]
+        (delete (skull-ext file))
         (is (= nil (recover file)))))
     
     (testing "it journal the file before persist"
-      (let [file (res-path "journaled.sk")]
+      (let [file (res-path "journaled")]
         (delete (journal-ext file))
         (journal file data)
         (is (= true (util/exists (journal-ext file))))))))
@@ -59,7 +60,7 @@
 (deftest unit-of-work
 
   (testing "is persisting changes for single access"
-    (let [file (res-path "single.sk")
+    (let [file (res-path "single")
           added {:name "Mateus" :surname "Brum"}]
       (delete file)
       (unit file (fn [data] (cons added data)))
@@ -75,8 +76,8 @@
   
   (testing "it versionate persistence file"
     (let [data (list #{:skull :rules})
-          main-file (res-path "main-versionated.sk")
-          jour-file (res-path "journal-versionated.sk")]
+          main-file (res-path "main-versionated")
+          jour-file (res-path "journal-versionated")]
       (delete main-file)
       (delete (str jour-file "j"))
       (snapshot main-file data)

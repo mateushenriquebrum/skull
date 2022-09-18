@@ -10,8 +10,11 @@
 ;;change the file extension schema
 ;;snapshot logic
 
+(defn skull-ext [file]
+  (str file ".sk"))
+
 (defn journal-ext [file]
-  (str file "j"))
+  (str file ".skj"))
 
 (defn string-to-path [string]
   (let [uri (URI/create (str "file:" string))]
@@ -22,10 +25,8 @@
     (FileChannel/open (string-to-path path) options)))
 
 (defn channel-read [path]
-  (let [options (into-array OpenOption [StandardOpenOption/READ])
-        uri (URI/create (str "file:" path))
-        path (Paths/get uri)]
-    (FileChannel/open path options)))
+  (let [options (into-array OpenOption [StandardOpenOption/READ])]
+    (FileChannel/open (string-to-path path) options)))
 
 (defn write [path data]
   (let [bytes (util/string-to-byte-buffer data)]
@@ -44,14 +45,15 @@
 
 (defn snapshot [file, structure]
   (let [data (pr-str (util/versionate structure))]
-  (with-open [w (io/writer file :append false)]
+  (with-open [w (io/writer (skull-ext file) :append false)]
     (.write w data))))
 
 (defn recover [file]
-  (if (util/exists file)
-    (util/file-to-data file)
-    (let [h (util/adler (pr-str (list)))]
-      (snapshot file (list {:version h})))))
+  (let [skull-path (skull-ext file)]
+    (if (util/exists skull-path)
+      (util/file-to-data skull-path)
+      (let [h (util/adler (pr-str (list)))]
+        (snapshot skull-path (list {:version h}))))))
 
 (defn transaction [src fn]
   (dosync
