@@ -7,7 +7,6 @@
    [java.nio.channels FileChannel]))
 
 ;;todo
-;;change the file extension schema
 ;;snapshot logic
 
 (defn skull-ext [file]
@@ -20,22 +19,22 @@
   (let [uri (URI/create (str "file:" string))]
     (Paths/get uri)))
 
-(defn channel-write [path]
+(defn writeable-channel [path]
   (let [options (into-array OpenOption [StandardOpenOption/CREATE StandardOpenOption/APPEND])]
     (FileChannel/open (string-to-path path) options)))
 
-(defn channel-read [path]
+(defn readable-channel [path]
   (let [options (into-array OpenOption [StandardOpenOption/READ])]
     (FileChannel/open (string-to-path path) options)))
 
 (defn write [path data]
   (let [bytes (util/string-to-byte-buffer data)]
-    (with-open [c (channel-write path)]
+    (with-open [c (writeable-channel path)]
       (.write c bytes))))
 
 (defn transfer-to [src-path rec-path]
-  (with-open [src (channel-read src-path)
-              rec (channel-write rec-path)]
+  (with-open [src (readable-channel src-path)
+              rec (writeable-channel rec-path)]
     (.transferTo src 0 (.size src) rec)))
 
 (defn journal [path structure]
