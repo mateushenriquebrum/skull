@@ -23,7 +23,7 @@
     
     (testing "convert to byte buffer"
       (let [to-convert "àáçćÿįī@%±~abc123"]
-        (is 16 (.capacity (string-to-byte-buffer to-convert)))))
+        (is 16 (.capacity (util/string-to-byte-buffer to-convert)))))
     
     (testing "it recover empty list"
       (let [file (in-path "empty.sk")]

@@ -2,16 +2,10 @@
   (:require [clojure.java.io :as io]
             [skull.util :as util])
   (:import
-   [java.nio ByteBuffer]
-   [java.nio.charset StandardCharsets]
    [java.nio.file OpenOption Paths StandardOpenOption]
    [java.net URI]
    [java.nio.channels FileChannel]))
 
-(defn string-to-byte-buffer [string]
-  (let [bts (.getBytes string StandardCharsets/UTF_8)]
-    (doto
-     (ByteBuffer/wrap bts))))
 
 (defn journal-ext [file]
   (str file "j"))
@@ -22,7 +16,7 @@
         uri (URI/create (str "file:" journal-file))
         path (Paths/get uri)
         data (pr-str structure)
-        bytes (string-to-byte-buffer data)]
+        bytes (util/string-to-byte-buffer data)]
     (with-open [c (FileChannel/open path options)]
       (.write c bytes))))
 
