@@ -11,7 +11,7 @@
     (io/delete-file file)))
 
 (defn res-path [file]
-  (str (pwd) "/test/res/" file))
+  (str (util/pwd) "/test/res/" file))
 
 (deftest persist-file
   (let [data '({:name "Mateus" :surname "Brum"} {:name "Iago" :surname "Brum"})]

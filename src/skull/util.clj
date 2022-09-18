@@ -4,6 +4,7 @@
   (:import
    [java.util.zip Adler32]
    [java.nio ByteBuffer]
+   [java.io File]
    [java.nio.charset StandardCharsets]))
 
 (defn adler [string]
@@ -23,6 +24,9 @@
 (defn file-to-data [file]
   (let [data (slurp file)]
     (read-string data)))
+
+(defn pwd []
+  (.getAbsolutePath (File. "")))
 
 (defn string-to-byte-buffer [string]
   (let [bts (.getBytes string StandardCharsets/UTF_8)]

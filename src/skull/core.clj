@@ -4,8 +4,7 @@
   (:import
    [java.nio.file OpenOption Paths StandardOpenOption]
    [java.net URI]
-   [java.nio.channels FileChannel]
-   [java.io File]))
+   [java.nio.channels FileChannel]))
 
 ;;todo
 ;;change the file extension schema
@@ -13,9 +12,6 @@
 
 (defn journal-ext [file]
   (str file "j"))
-
-(defn pwd []
-  (.getAbsolutePath (File. "")))
 
 (defn string-to-path [string]
   (let [uri (URI/create (str "file:" string))]
