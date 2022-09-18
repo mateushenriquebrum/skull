@@ -4,16 +4,26 @@
   (:import
    [java.nio.file OpenOption Paths StandardOpenOption]
    [java.net URI]
-   [java.nio.channels FileChannel]))
+   [java.nio.channels FileChannel]
+   [java.io File]))
+
+;;todo
+;;change the file extension schema
+;;snapshot logic
 
 (defn journal-ext [file]
   (str file "j"))
 
+(defn pwd []
+  (.getAbsolutePath (File. "")))
+
+(defn string-to-path [string]
+  (let [uri (URI/create (str "file:" string))]
+    (Paths/get uri)))
+
 (defn channel-write [path]
-  (let [options (into-array OpenOption [StandardOpenOption/CREATE StandardOpenOption/APPEND])
-        uri (URI/create (str "file:" path))
-        path (Paths/get uri)]
-    (FileChannel/open path options)))
+  (let [options (into-array OpenOption [StandardOpenOption/CREATE StandardOpenOption/APPEND])]
+    (FileChannel/open (string-to-path path) options)))
 
 (defn channel-read [path]
   (let [options (into-array OpenOption [StandardOpenOption/READ])
