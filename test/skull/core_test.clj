@@ -11,7 +11,7 @@
 (defn in-path [file]
   (str "/Users/mbrum/Workspace/Clojure/skull/test/res/" file))
 
-(deftest persist
+(deftest persist-file
   (let [data '({:name "Mateus" :surname "Brum"} {:name "Iago" :surname "Brum"})]
     
     (testing "it serialize data into the file"
@@ -35,6 +35,15 @@
         (delete (journal-ext file))
         (journal file data)
         (is (= true (util/exists (journal-ext file))))))))
+
+(deftest transfer-by-channel
+  
+  (testing "it should transfer"
+    (let [r (in-path "rec.transfer")
+          s (in-path "read.only")]
+      (delete r)
+      (transfer-to s r)
+      (is (= "read only file" (slurp r))))))
 
 (deftest access
   

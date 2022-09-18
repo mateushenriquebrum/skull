@@ -9,15 +9,32 @@
 (defn journal-ext [file]
   (str file "j"))
 
-(defn journal [file structure]
+(defn channel-write [path]
   (let [options (into-array OpenOption [StandardOpenOption/CREATE StandardOpenOption/APPEND])
-        journal-file (journal-ext file)
-        uri (URI/create (str "file:" journal-file))
-        path (Paths/get uri)
-        data (pr-str (util/versionate structure))
-        bytes (util/string-to-byte-buffer data)]
-    (with-open [c (FileChannel/open path options)]
+        uri (URI/create (str "file:" path))
+        path (Paths/get uri)]
+    (FileChannel/open path options)))
+
+(defn channel-read [path]
+  (let [options (into-array OpenOption [StandardOpenOption/READ])
+        uri (URI/create (str "file:" path))
+        path (Paths/get uri)]
+    (FileChannel/open path options)))
+
+(defn write [path data]
+  (let [bytes (util/string-to-byte-buffer data)]
+    (with-open [c (channel-write path)]
       (.write c bytes))))
+
+(defn transfer-to [src-path rec-path]
+  (with-open [src (channel-read src-path)
+              rec (channel-write rec-path)]
+    (.transferTo src 0 (.size src) rec)))
+
+(defn journal [path structure]
+  (let [journal-path (journal-ext path)
+        data (pr-str (util/versionate structure))]
+    (write journal-path data)))
 
 (defn snapshot [file, structure]
   (let [data (pr-str (util/versionate structure))]
