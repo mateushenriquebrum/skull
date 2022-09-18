@@ -20,6 +20,10 @@
 (defn exists [file]
   (.exists (io/file file)))
 
+(defn file-to-data [file]
+  (let [data (slurp file)]
+    (read-string data)))
+
 (defn string-to-byte-buffer [string]
   (let [bts (.getBytes string StandardCharsets/UTF_8)]
     (doto

@@ -60,4 +60,15 @@
      (is (= 110297644 (util/adler "skull" ))))
   
   (testing "it versionate a data"
-    (is (= {:version 8061010} (first (util/versionate (list)))))))
+    (is (= {:version 8061010} (first (util/versionate (list))))))
+  
+  (testing "it versionate persistence file"
+    (let [data (list #{:skull :rules})
+          main-file (in-path "main-versionated.sk")
+          jour-file (in-path "journal-versionated.sk")]
+      (delete main-file)
+      (delete (str jour-file "j"))
+      (snapshot main-file data)
+      (journal jour-file data)
+      (is (= {:version 961807959} (first (util/file-to-data (in-path "main-versionated.sk")))))
+      (is (= {:version 961807959} (first (util/file-to-data (in-path "journal-versionated.skj"))))))))

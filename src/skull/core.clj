@@ -6,7 +6,6 @@
    [java.net URI]
    [java.nio.channels FileChannel]))
 
-
 (defn journal-ext [file]
   (str file "j"))
 
@@ -15,7 +14,7 @@
         journal-file (journal-ext file)
         uri (URI/create (str "file:" journal-file))
         path (Paths/get uri)
-        data (pr-str structure)
+        data (pr-str (util/versionate structure))
         bytes (util/string-to-byte-buffer data)]
     (with-open [c (FileChannel/open path options)]
       (.write c bytes))))
@@ -27,8 +26,7 @@
 
 (defn recover [file]
   (if (util/exists file)
-    (let [data (slurp file)]
-      (read-string data))
+    (util/file-to-data file)
     (let [h (util/adler (pr-str (list)))]
       (snapshot file (list {:version h})))))
 
