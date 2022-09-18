@@ -5,7 +5,10 @@
    [java.util.zip Adler32]
    [java.nio ByteBuffer]
    [java.io File]
-   [java.nio.charset StandardCharsets]))
+   [java.nio.charset StandardCharsets]
+   [java.nio.file OpenOption Paths StandardOpenOption]
+   [java.net URI]
+   [java.nio.channels FileChannel]))
 
 (defn adler [string]
   (let [bts (.getBytes string)
@@ -32,3 +35,15 @@
   (let [bts (.getBytes string StandardCharsets/UTF_8)]
     (doto
      (ByteBuffer/wrap bts))))
+
+(defn string-to-path [string]
+  (let [uri (URI/create (str "file:" string))]
+    (Paths/get uri)))
+
+(defn writeable-channel [path]
+  (let [options (into-array OpenOption [StandardOpenOption/CREATE StandardOpenOption/APPEND])]
+    (FileChannel/open (string-to-path path) options)))
+
+(defn readable-channel [path]
+  (let [options (into-array OpenOption [StandardOpenOption/READ])]
+    (FileChannel/open (string-to-path path) options)))

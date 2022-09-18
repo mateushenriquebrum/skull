@@ -1,11 +1,6 @@
 (ns skull.core
   (:require [clojure.java.io :as io]
-            [skull.util :as util])
-  (:import
-   [java.nio.file OpenOption Paths StandardOpenOption]
-   [java.net URI]
-   [java.nio.channels FileChannel]))
-
+            [skull.util :as util]))
 ;;todo
 ;;snapshot logic
 
@@ -15,26 +10,14 @@
 (defn journal-ext [file]
   (str file ".skj"))
 
-(defn string-to-path [string]
-  (let [uri (URI/create (str "file:" string))]
-    (Paths/get uri)))
-
-(defn writeable-channel [path]
-  (let [options (into-array OpenOption [StandardOpenOption/CREATE StandardOpenOption/APPEND])]
-    (FileChannel/open (string-to-path path) options)))
-
-(defn readable-channel [path]
-  (let [options (into-array OpenOption [StandardOpenOption/READ])]
-    (FileChannel/open (string-to-path path) options)))
-
 (defn write [path data]
   (let [bytes (util/string-to-byte-buffer data)]
-    (with-open [c (writeable-channel path)]
+    (with-open [c (util/writeable-channel path)]
       (.write c bytes))))
 
 (defn transfer-to [src-path rec-path]
-  (with-open [src (readable-channel src-path)
-              rec (writeable-channel rec-path)]
+  (with-open [src (util/readable-channel src-path)
+              rec (util/writeable-channel rec-path)]
     (.transferTo src 0 (.size src) rec)))
 
 (defn journal [path structure]
