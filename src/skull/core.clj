@@ -52,7 +52,7 @@
     (if (util/exists skull-path)
       (util/file-to-data skull-path)
       (let [h (util/adler (pr-str (list)))]
-        (snapshot skull-path (list {:version h}))))))
+        (snapshot file (list {:version h}))))))
 
 (defn transaction [src fn]
   (dosync
