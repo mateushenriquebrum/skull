@@ -20,15 +20,18 @@
               rec (util/writeable-channel rec-path)]
     (.transferTo src 0 (.size src) rec)))
 
+(defn versiontated-data [struct]
+  (pr-str (util/versionate struct)))
+  
+
 (defn journal [path structure]
   (let [journal-path (journal-ext path)
-        data (pr-str (util/versionate structure))]
+        data (versiontated-data structure)]
     (write journal-path data)))
 
 (defn snapshot [file, structure]
-  (let [data (pr-str (util/versionate structure))]
-  (with-open [w (io/writer (skull-ext file) :append false)]
-    (.write w data))))
+  (journal file structure)
+  (transfer-to (journal-ext file) (skull-ext file)))
 
 (defn recover [file]
   (let [skull-path (skull-ext file)]
@@ -37,13 +40,13 @@
       (let [h (util/adler (pr-str (list)))]
         (snapshot file (list {:version h}))))))
 
-(defn transaction [src fn]
+(defn smt [src fn]
   (dosync
    (swap! src fn)))
 
-(defn unit [file fn]
+(defn transaction [file fn]
   (let [src (atom (recover file))]
-    (transaction src fn)
+    (smt src fn)
     (snapshot file @src)))
 
 

@@ -53,17 +53,17 @@
   (testing "is queues the access to data"
     (let [src (atom 0)]
       (dotimes [_ 9]
-        (future (transaction src (fn [data] (+ data 1)))))
+        (future (smt src (fn [data] (+ data 1)))))
       (Thread/sleep 100) ;; workaround, how to join all futures?
       (is (= 9 @src)))))
 
-(deftest unit-of-work
+(deftest transactional
 
   (testing "is persisting changes for single access"
     (let [file (res-path "single")
           added {:name "Mateus" :surname "Brum"}]
       (delete file)
-      (unit file (fn [data] (cons added data)))
+      (transaction file (fn [data] (cons added data)))
       (is (= added (last (recover file)))))))
 
 (deftest version
@@ -80,7 +80,6 @@
           jour-file (res-path "journal-versionated")]
       (delete main-file)
       (delete (str jour-file "j"))
-      (snapshot main-file data)
-      (journal jour-file data)
+      (snapshot main-file data)      
       (is (= {:version 961807959} (first (util/file-to-data (res-path "main-versionated.sk")))))
       (is (= {:version 961807959} (first (util/file-to-data (res-path "journal-versionated.skj"))))))))
