@@ -1,6 +1,6 @@
-(ns skull.util
+(ns skull.io
   (:require
-   [clojure.java.io :as io])
+   [clojure.java.io :as jio])
   (:import
    [java.util.zip Adler32]
    [java.nio ByteBuffer]
@@ -22,7 +22,7 @@
     (conj data meta)))
 
 (defn exists [file]
-  (.exists (io/file file)))
+  (.exists (jio/file file)))
 
 (defn file-to-data [file]
   (let [data (slurp file)]

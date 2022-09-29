@@ -1,17 +1,17 @@
 (ns skull.core-test
   (:require [clojure.test :refer :all]
             [skull.core :refer :all]
-            [clojure.java.io :as io]
-            [skull.util :as util]))
+            [clojure.java.io :as jio]
+            [skull.io :as io]))
 
 ;;refactor the tests
 
 (defn delete [file]
-  (when (util/exists file)
-    (io/delete-file file)))
+  (when (io/exists file)
+    (jio/delete-file file)))
 
 (defn res-path [file]
-  (str (util/pwd) "/test/res/" file))
+  (str (io/pwd) "/test/res/" file))
 
 (deftest persist-file
   
@@ -21,12 +21,12 @@
       (let [file (res-path "serialize")]
         (delete file)
         (snapshot file data)
-        (is (= true (util/exists (skull-ext file))))
+        (is (= true (io/exists (skull-ext file))))
         (is (= data (rest (recover file))))))
     
     (testing "convert to byte buffer"
       (let [to-convert "àáçćÿįī@%±~abc123"]
-        (is 16 (.capacity (util/string-to-byte-buffer to-convert)))))
+        (is 16 (.capacity (io/string-to-byte-buffer to-convert)))))
     
     (testing "it recover empty list"
       (let [file (res-path "empty")]
@@ -37,7 +37,7 @@
       (let [file (res-path "journaled")]
         (delete (journal-ext file))
         (journal file data)
-        (is (= true (util/exists (journal-ext file))))))))
+        (is (= true (io/exists (journal-ext file))))))))
 
 (deftest transfer-by-channel
   
@@ -69,10 +69,10 @@
 (deftest version
   
   (testing "it returs a hash number"
-     (is (= 110297644 (util/adler "skull" ))))
+     (is (= 110297644 (io/adler "skull" ))))
   
   (testing "it versionate a data"
-    (is (= {:version 8061010} (first (util/versionate (list))))))
+    (is (= {:version 8061010} (first (io/versionate (list))))))
   
   (testing "it versionate persistence file"
     (let [data (list #{:skull :rules})
@@ -81,5 +81,5 @@
       (delete main-file)
       (delete (str jour-file "j"))
       (snapshot main-file data)      
-      (is (= {:version 961807959} (first (util/file-to-data (res-path "main-versionated.sk")))))
-      (is (= {:version 961807959} (first (util/file-to-data (res-path "journal-versionated.skj"))))))))
+      (is (= {:version 961807959} (first (io/file-to-data (res-path "main-versionated.sk")))))
+      (is (= {:version 961807959} (first (io/file-to-data (res-path "journal-versionated.skj"))))))))
