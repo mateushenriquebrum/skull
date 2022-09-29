@@ -3,35 +3,40 @@
             [skull.core :refer :all]
             [skull.io :as io]))
 
-;;refactor the tests
-
-
 (defn res-path [file]
   (str (io/pwd) "/test/res/" file))
 
 (deftest persist-file
   
   (let [data '({:name "Mateus" :surname "Brum"} {:name "Iago" :surname "Brum"})]
-    
+
     (testing "it serialize data into the file"
       (let [file (res-path "serialize")]
         (io/safe-delete file)
         (snapshot file data)
         (is (= true (io/exists (skull-ext file))))
         (is (= data (rest (recover file))))))
-    
+
     (testing "convert to byte buffer"
       (let [to-convert "àáçćÿįī@%±~abc123"]
         (is 16 (.capacity (io/string-to-byte-buffer to-convert)))))
-    
-    (testing "it recover empty list"
+
+    (testing "it fail if no recover file is found"
       (let [file (res-path "empty")]
+        (io/safe-delete (journal-ext file))
         (io/safe-delete (skull-ext file))
-        (is (= nil (recover file)))))
-    
+        (is (thrown? Exception (recover file)))))
+
+    (testing "it recover from journal"
+      (let [file (res-path "broken")]
+        (io/safe-delete (journal-ext file))
+        (io/safe-delete (skull-ext file))
+        (is (= true false))))
+
     (testing "it journal the file before persist"
       (let [file (res-path "journaled")]
         (io/safe-delete (journal-ext file))
+        (io/safe-delete (skull-ext file))
         (journal file data)
         (is (= true (io/exists (journal-ext file))))))))
 

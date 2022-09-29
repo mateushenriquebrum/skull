@@ -19,7 +19,6 @@
 
 (defn versiontated-data [struct]
   (pr-str (io/versionate struct)))
-  
 
 (defn journal [path structure]
   (let [journal-path (journal-ext path)
@@ -31,11 +30,11 @@
   (transfer-to (journal-ext file) (skull-ext file)))
 
 (defn recover [file]
-  (let [skull-path (skull-ext file)]
+  (let [skull-path (skull-ext file)
+        journal-path (journal-ext file)]
     (if (io/exists skull-path)
       (io/file-to-data skull-path)
-      (let [h (io/adler (pr-str (list)))]
-        (snapshot file (list {:version h}))))))
+      (io/file-to-data journal-path))))
 
 (defn smt [src fn]
   (dosync
