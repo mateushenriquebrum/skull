@@ -1,7 +1,5 @@
 (ns skull.core
   (:require [skull.io :as io]))
-;;todo
-;;snapshot logic
 
 (defn skull-ext [file]
   (str file ".sk"))

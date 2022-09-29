@@ -24,6 +24,10 @@
 (defn exists [file]
   (.exists (jio/file file)))
 
+(defn safe-delete [file]
+  (when (exists file)
+    (jio/delete-file file)))
+
 (defn file-to-data [file]
   (let [data (slurp file)]
     (read-string data)))

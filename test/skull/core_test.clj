@@ -1,14 +1,10 @@
 (ns skull.core-test
   (:require [clojure.test :refer :all]
             [skull.core :refer :all]
-            [clojure.java.io :as jio]
             [skull.io :as io]))
 
 ;;refactor the tests
 
-(defn delete [file]
-  (when (io/exists file)
-    (jio/delete-file file)))
 
 (defn res-path [file]
   (str (io/pwd) "/test/res/" file))
@@ -19,7 +15,7 @@
     
     (testing "it serialize data into the file"
       (let [file (res-path "serialize")]
-        (delete file)
+        (io/safe-delete file)
         (snapshot file data)
         (is (= true (io/exists (skull-ext file))))
         (is (= data (rest (recover file))))))
@@ -30,12 +26,12 @@
     
     (testing "it recover empty list"
       (let [file (res-path "empty")]
-        (delete (skull-ext file))
+        (io/safe-delete (skull-ext file))
         (is (= nil (recover file)))))
     
     (testing "it journal the file before persist"
       (let [file (res-path "journaled")]
-        (delete (journal-ext file))
+        (io/safe-delete (journal-ext file))
         (journal file data)
         (is (= true (io/exists (journal-ext file))))))))
 
@@ -44,7 +40,7 @@
   (testing "it should transfer"
     (let [r (res-path "rec.transfer")
           s (res-path "read.only")]
-      (delete r)
+      (io/safe-delete r)
       (transfer-to s r)
       (is (= "read only file" (slurp r))))))
 
@@ -62,7 +58,7 @@
   (testing "is persisting changes for single access"
     (let [file (res-path "single")
           added {:name "Mateus" :surname "Brum"}]
-      (delete file)
+      (io/safe-delete file)
       (transaction file (fn [data] (cons added data)))
       (is (= added (last (recover file)))))))
 
@@ -78,8 +74,8 @@
     (let [data (list #{:skull :rules})
           main-file (res-path "main-versionated")
           jour-file (res-path "journal-versionated")]
-      (delete main-file)
-      (delete (str jour-file "j"))
+      (io/safe-delete main-file)
+      (io/safe-delete (str jour-file "j"))
       (snapshot main-file data)      
       (is (= {:version 961807959} (first (io/file-to-data (res-path "main-versionated.sk")))))
       (is (= {:version 961807959} (first (io/file-to-data (res-path "journal-versionated.skj"))))))))
